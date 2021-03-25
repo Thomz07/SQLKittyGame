@@ -40,8 +40,32 @@ def index():
 
 @app.route('/login', methods=['POST'])
 def login():
-    return "Not implemented", 501
 
+    formulaire_inscription = request.get_json()
+
+    email = formulaire_inscription["email"]
+    password = formulaire_inscription["password"]
+    sql_request = f'''SELECT * FROM players WHERE players_email = "{email}"'''
+
+    players_avec_cette_email = sql_select(sql_request)
+
+    if len(players_avec_cette_email) == 0:
+        return "Email non inscrit", 503
+
+    sql_request_mdp = f'''SELECT * FROM players WHERE players_password = "{password}" AND players_email = "{email}"'''
+
+    mauvais_mot_de_passe = sql_select(sql_request_mdp)
+
+    if len(mauvais_mot_de_passe) == 0:
+        return "Mot de passe incorrect", 503
+
+    id_player = mauvais_mot_de_passe[0]["players_id"]
+
+    print(id_player)
+
+    dictionary = {"id":id_player}
+
+    return jsonify(dictionary), 200
 
 @app.route('/signup', methods=['POST'])
 def sign_up():
